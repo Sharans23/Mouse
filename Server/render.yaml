@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mouse-control-server
+    env: node
+    buildCommand: npm install && pip install pynput
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    healthCheckPath: /health
+    autoDeploy: true
