@@ -12,11 +12,12 @@ const PORT = process.env.PORT || 3000;
 // CORS configuration for Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "https://mouse-udux.vercel.app",
-    methods: ["GET", "POST"],
+    origin: ["https://mouse-udux.vercel.app", "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Content-Range", "X-Content-Range"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   },
 });
 
@@ -32,10 +33,16 @@ app.use(
 
 // Additional CORS headers middleware
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://mouse-udux.vercel.app");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,POST");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Origin", "https://mouse-udux.vercel.app");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
   next();
 });
 

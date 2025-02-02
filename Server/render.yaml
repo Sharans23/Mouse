@@ -2,12 +2,25 @@ services:
   - type: web
     name: mouse-control-server
     env: node
-    buildCommand: npm install && pip install pynput
+    plan: free
+    buildCommand: npm install
     startCommand: node server.js
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
-    healthCheckPath: /health
-    autoDeploy: true
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: https://mouse-udux.vercel.app
+      - path: /*
+        name: Access-Control-Allow-Methods
+        value: GET, POST, OPTIONS
+      - path: /*
+        name: Access-Control-Allow-Headers
+        value: Content-Type, Authorization
+      - path: /*
+        name: Access-Control-Allow-Credentials
+        value: "true"
