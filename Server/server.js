@@ -6,25 +6,32 @@ const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
+
+// ✅ Use PORT from environment variable (Render requirement)
+const PORT = process.env.PORT || 3000;
+
 const io = new Server(server, {
   cors: {
-    origin: "https://mouse-udux.vercel.app", // ✅ Allow frontend requests
+    origin: "https://mouse-udux.vercel.app", // ✅ Add frontend URL
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
-app.use(
-  cors({
-    origin: "https://mouse-udux.vercel.app", // ✅ Allow frontend requests
-    methods: ["GET", "POST"],
-  })
-);
+app.use(cors({ origin: "https://mouse-udux.vercel.app" })); // ✅ Allow CORS for API routes
 
+// ✅ Health Check Route
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
 
-// Serve the connection code
+// ✅ Serve connection code
 app.get("/code", (req, res) => {
   res.json({ code: connectionCode });
 });
+
+let connectionCode = Math.floor(1000 + Math.random() * 9000); // Generate 4-digit code
+let connectedSockets = {};
 
 io.on("connection", (socket) => {
   console.log("A client connected");
@@ -40,27 +47,18 @@ io.on("connection", (socket) => {
   });
 
   socket.on("mouseMove", (data) => {
-    PythonShell.run(
-      "mouse_control.py",
-      { args: ["move", data.x, data.y] },
-      (err) => {
-        if (err) console.error("Error moving mouse:", err);
-      }
-    );
+    PythonShell.run("mouse_control.py", { args: ["move", data.x, data.y] });
   });
 
   socket.on("click", (type) => {
-    PythonShell.run("mouse_control.py", { args: ["click", type] }, (err) => {
-      if (err) console.error("Error clicking mouse:", err);
-    });
+    PythonShell.run("mouse_control.py", { args: ["click", type] });
   });
-
 
   socket.on("disconnect", () => {
     delete connectedSockets[socket.id];
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
