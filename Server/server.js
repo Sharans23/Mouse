@@ -7,13 +7,19 @@ const cors = require("cors");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: "https://mouse-udux.vercel.app", // ✅ Allow frontend requests
+    methods: ["GET", "POST"],
+  },
 });
 
-let connectionCode = Math.floor(1000 + Math.random() * 9000); // Generate 4-digit code
-let connectedSockets = {};
+app.use(
+  cors({
+    origin: "https://mouse-udux.vercel.app", // ✅ Allow frontend requests
+    methods: ["GET", "POST"],
+  })
+);
 
-app.use(cors());
 
 // Serve the connection code
 app.get("/code", (req, res) => {
@@ -34,12 +40,21 @@ io.on("connection", (socket) => {
   });
 
   socket.on("mouseMove", (data) => {
-    PythonShell.run("mouse_control.py", { args: ["move", data.x, data.y] });
+    PythonShell.run(
+      "mouse_control.py",
+      { args: ["move", data.x, data.y] },
+      (err) => {
+        if (err) console.error("Error moving mouse:", err);
+      }
+    );
   });
 
   socket.on("click", (type) => {
-    PythonShell.run("mouse_control.py", { args: ["click", type] });
+    PythonShell.run("mouse_control.py", { args: ["click", type] }, (err) => {
+      if (err) console.error("Error clicking mouse:", err);
+    });
   });
+
 
   socket.on("disconnect", () => {
     delete connectedSockets[socket.id];
