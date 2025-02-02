@@ -12,7 +12,7 @@ function App() {
   useEffect(() => {
     // If in computer mode, fetch and display the code
     if (mode === "computer") {
-      fetch("http://localhost:3000/code")
+      fetch("https://mouse-39ig.onrender.com/code")
         .then((res) => res.json())
         .then((data) => setCode(data.code));
     }
