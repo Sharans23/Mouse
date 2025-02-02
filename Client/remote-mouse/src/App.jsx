@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:3000"); // Change to PC's local IP for mobile access
+const socket = io("https://mouse-39ig.onrender.com"); // Change to PC's local IP for mobile access
 
 function App() {
   const [mode, setMode] = useState(null); // "computer" or "mobile"
